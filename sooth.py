@@ -27,6 +27,7 @@ SUNS_COLOURS = {
 }
 
 # TODO sooth card class with suits and functions
+# TODO reset path of suns function
 
 SOOTH_DECK = {
     'Hidden Moon': '01',
@@ -132,9 +133,13 @@ class SoothDeck:
         card_image_link = ''
         if given_card_name != '':
             (card_image_link, card_link) = self.get_sooth_card(given_card_name)
+            for key in self.current_sooth_deck:
+                if key.lower().startswith(given_card_name.lower()):
+                    self.current_sooth_deck.pop(key)
+                    break
         else:
             (card_image_link, card_link) = self.draw_random_sooth_card()
-        self.path_of_suns.next_sun(card_image_link)
+        self.path_of_suns.next_sun(card_link, card_image_link)
         return self.path_of_suns.get_current_active_sun()
 
     def get_active_sooth_cards(self):
@@ -143,17 +148,17 @@ class SoothDeck:
 
 class PathOfSuns:
     def __init__(self):
-        self.current_sun = 9
+        self.current_sun = 8
         self.current_path = [None for i in range(9)]
         self.current_sun_with_card = None
         self.invisible_sun_card = None
 
-    def next_sun(self, card_link):
+    def next_sun(self, card_link, card_image_link):
         self.current_sun = (self.current_sun + 1) % 9
-        self.current_sun_with_card = SunWithCard(PATH_OF_SUNS[self.current_sun], card_link)
+        self.current_sun_with_card = SunWithCard(PATH_OF_SUNS[self.current_sun], card_link, card_image_link)
         self.current_path[self.current_sun] = self.current_sun_with_card
         if self.current_sun_with_card.sun_name == 'invisible':
-            self.invisible_sun_card = SunWithCard(PATH_OF_SUNS[self.current_sun], card_link)
+            self.invisible_sun_card = SunWithCard(PATH_OF_SUNS[self.current_sun], card_link, card_image_link)
 
     def get_current_active_sun(self):
         return self.current_sun_with_card
@@ -163,10 +168,11 @@ class PathOfSuns:
 
 
 class SunWithCard:
-    def __init__(self, sun_name, sooth_card_link):
+    def __init__(self, sun_name, sooth_card_link, sooth_card_image_link):
         self.sun_name = sun_name
         self.sooth_card_link = sooth_card_link
-        self.colour = SUNS_COLOURS[sun_name]
+        self.sooth_card_image_link = sooth_card_image_link
+        self.sun_colour = SUNS_COLOURS[sun_name]
 
 
 if __name__ == '__main__':

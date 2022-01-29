@@ -8,10 +8,19 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 INVISIBLE_SUN_SOOTH_CARD_LINK = os.getenv('INVISIBLE_SUN_SOOTH_CARD_LINK')
 INVISIBLE_SUN_SOOTH_CARD_IMAGE_LINK = os.getenv('INVISIBLE_SUN_SOOTH_CARD_IMAGE_LINK')
-print(INVISIBLE_SUN_SOOTH_CARD_LINK)
-print(INVISIBLE_SUN_SOOTH_CARD_IMAGE_LINK)
 
-VALID_COMMANDS = ('/sooth', '/spell', '/vance', '/weaver', '/eph', '/inc', '/obj')
+VALID_COMMANDS = (
+    '/sooth',
+    '/spell',
+    '/vance',
+    '/weaver',
+    '/ephemera',
+    '/eph',
+    '/incantation',
+    '/inc',
+    '/objectofpower',
+    '/obj'
+)
 
 
 class CustomClient(discord.Client):
@@ -25,6 +34,7 @@ class CustomClient(discord.Client):
             f'{guild.name}(id: {guild.id})'
         )
 
+    # TODO IS Help
     async def on_message(self, message):
         if message.author == client.user:
             return
@@ -39,11 +49,11 @@ class CustomClient(discord.Client):
                 await self.vance_commands(message.channel, split_message[1:])
             elif command == '/weaver':
                 await self.incantation_commands(message.channel, split_message[1:])
-            elif command == '/eph':
+            elif command == '/ephemera' or command == '/eph':
                 await self.ephemera_commands(message.channel, split_message[1:])
-            elif command == '/inc':
+            elif command == '/incantation' or command == '/inc':
                 await self.incantation_commands(message.channel, split_message[1:])
-            elif command == '/obj':
+            elif command == '/objectofpower' or command == '/obj':
                 await self.object_of_power_commands(message.channel, split_message[1:])
             else:
                 await message.channel.send('unrecognised command')
@@ -52,15 +62,14 @@ class CustomClient(discord.Client):
         print('SOOTH COMMANDS')
         if split_message == []:
             print('-RANDOM')
-            (card_link, image_link) = self.sooth_deck.get_random_sooth_card()
-            await channel.send(image_link)
-            await channel.send(card_link)
+            (image_link, card_link) = self.sooth_deck.get_random_sooth_card()
+            await self.display_card(channel, card_link, image_link)
+            return
         sooth_command = split_message[0].lower()
         if sooth_command == 'draw':
             print('-DRAW')
-            (card_link, image_link) = self.sooth_deck.draw_random_sooth_card()
-            await channel.send(image_link)
-            await channel.send(card_link)
+            (image_link, card_link) = self.sooth_deck.draw_random_sooth_card()
+            await self.display_card(channel, card_link, image_link)
         elif sooth_command == 'path':
             print('-PATH')
             sun_with_card = None
@@ -80,7 +89,8 @@ class CustomClient(discord.Client):
             if (invisible_sun_card != None):
                 await self.display_sun_with_card(channel, invisible_sun_card)
         else:
-            await channel.send(self.sooth_deck.get_sooth_card(split_message[0]))
+            (image_link, card_link) = self.sooth_deck.get_sooth_card(split_message[0])
+            await self.display_card(channel, card_link, image_link)
 
     async def spell_commands(self, channel, split_message):
         # get named
@@ -119,19 +129,29 @@ class CustomClient(discord.Client):
         # get random
         # get random for level
         # get random in level range
-        await channel.send('TODO implement ephemera commands')
+        await channel.send('TODO implement object of power commands')
 
-    async def display_image_with_link(self, channel, image_link, link):
+    async def display_image_with_link(self, channel, link, image_link):
         e = discord.Embed()
         e.set_image(url=image_link)
         e.title = link
         await channel.send(embed=e)
 
     async def display_sun_with_card(self, channel, sun_with_card):
+        await self.display_card(
+            channel,
+            sun_with_card.sooth_card_link,
+            sun_with_card.sooth_card_image_link,
+            sun_with_card.sun_name,
+            sun_with_card.sun_colour
+        )
+
+    async def display_card(self, channel, card_link, card_image_link, sun_name = '', sun_colour = discord.Colour.default()):
         e = discord.Embed()
-        e.set_image(url=sun_with_card.sooth_card_link)
-        e.colour = sun_with_card.colour
-        e.title = sun_with_card.sun_name
+        e.set_image(url=card_image_link)
+        e.colour = sun_colour
+        e.title = card_link
+        e.set_footer(text=sun_name)
         await channel.send(embed=e)
 
 
