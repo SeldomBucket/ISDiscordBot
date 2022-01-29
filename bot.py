@@ -83,21 +83,42 @@ class CustomClient(discord.Client):
             await channel.send(self.sooth_deck.get_sooth_card(split_message[0]))
 
     async def spell_commands(self, channel, split_message):
+        # get named
+        # get random
+        # get random for level
+        # get random in level range
+        # get random for sun type
         await channel.send('TODO implement spell commands')
 
     async def vance_commands(self, channel, split_message):
+        # get named
+        # get random
+        # get random for type
         await channel.send('TODO implement vance commands')
 
     async def weaver_commands(self, channel, split_message):
+        # get named
         await channel.send('TODO implement weaver commands')
 
     async def ephemera_commands(self, channel, split_message):
+        # get named
+        # get random
+        # get random for level
+        # get random in level range
         await channel.send('TODO implement ephemera commands')
 
     async def incantation_commands(self, channel, split_message):
+        # get named
+        # get random
+        # get random for level
+        # get random in level range
         await channel.send('TODO implement incantation commands')
 
     async def object_of_power_commands(self, channel, split_message):
+        # get named
+        # get random
+        # get random for level
+        # get random in level range
         await channel.send('TODO implement ephemera commands')
 
     async def display_image_with_link(self, channel, image_link, link):
