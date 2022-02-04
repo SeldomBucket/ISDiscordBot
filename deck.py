@@ -4,7 +4,7 @@ class Deck:
     def __init__(self, card_list, card_base_path):
         self.cards = []
         for card in card_list:
-            self.cards.append(Card(card, card_list[card]))
+            self.cards.append(Card(card[0], card[1], card[2]))
         self.card_base_path = card_base_path
         self.cards_by_level = []
         for i in range(14):
@@ -47,12 +47,16 @@ class Deck:
 
 
 class Card:
-    def __init__(self, name, level):
+    def __init__(self, name, level, colour):
         self.name = name
         self.level = level
+        self.colour = colour
 
     def __str__(self):
-        return 'Name: {name}\nLevel: {level}'.format(name=self.name, level=self.level)
+        return """
+            Name: {name}\n
+            Level: {level}\n
+            Colour{colour}""".format(name=self.name, level=self.level, colour=self.colour)
 
 
 
