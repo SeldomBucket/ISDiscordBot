@@ -5,6 +5,8 @@ import discord
 from dotenv import load_dotenv
 from ephemera_deck import EphemeraDeck
 from incantation_deck import IncantationDeck
+from kindled_items_deck import KindledItemsDeck
+from objects_of_power_deck import ObjectsOfPowerDeck
 from sooth import SoothDeck
 
 load_dotenv()
@@ -14,6 +16,7 @@ INVISIBLE_SUN_SOOTH_CARD_LINK = os.getenv('INVISIBLE_SUN_SOOTH_CARD_LINK')
 INVISIBLE_SUN_SOOTH_CARD_IMAGE_LINK = os.getenv('INVISIBLE_SUN_SOOTH_CARD_IMAGE_LINK')
 INCANTATION_CARD_PATH = os.getenv('INCANTATION_CARD_PATH')
 EPHEMERA_CARD_PATH = os.getenv('EPHEMERA_CARD_PATH')
+OBJECTS_OF_POWER_CARD_PATH = os.getenv('OBJECTS_OF_POWER_CARD_PATH')
 
 VALID_COMMANDS = (
     '/sooth',
@@ -25,7 +28,10 @@ VALID_COMMANDS = (
     '/incantation',
     '/inc',
     '/objectofpower',
-    '/obj'
+    '/obj',
+    '/oop',
+    '/kindleditems',
+    '/kin'
 )
 
 
@@ -34,6 +40,8 @@ class CustomClient(discord.Client):
         self.sooth_deck = SoothDeck(INVISIBLE_SUN_SOOTH_CARD_LINK, INVISIBLE_SUN_SOOTH_CARD_IMAGE_LINK)
         self.incantation_deck = IncantationDeck(INCANTATION_CARD_PATH)
         self.ephemera_deck = EphemeraDeck(EPHEMERA_CARD_PATH)
+        self.objects_of_power_deck = ObjectsOfPowerDeck(OBJECTS_OF_POWER_CARD_PATH)
+        self.kindled_items_deck = KindledItemsDeck(OBJECTS_OF_POWER_CARD_PATH)
 
     async def on_ready(self):
         guild = discord.utils.get(client.guilds, name=GUILD)
@@ -57,12 +65,14 @@ class CustomClient(discord.Client):
                 await self.vance_commands(message.channel, split_message[1:])
             elif command == '/weaver':
                 await self.incantation_commands(message.channel, split_message[1:])
-            elif command == '/ephemera' or command == '/eph':
+            elif command in ['/ephemera', '/eph']:
                 await self.ephemera_commands(message.channel, split_message[1:])
-            elif command == '/incantation' or command == '/inc':
+            elif command in ['/incantation', '/inc']:
                 await self.incantation_commands(message.channel, split_message[1:])
-            elif command == '/objectofpower' or command == '/obj':
+            elif command in ['/objectofpower', '/obj', '/oop']:
                 await self.object_of_power_commands(message.channel, split_message[1:])
+            elif command in ['/kindleditems', '/kin']:
+                await self.kindled_items_commands(message.channel, split_message[1:])
             else:
                 await message.channel.send('unrecognised command')
 
@@ -133,11 +143,12 @@ class CustomClient(discord.Client):
         await self.basic_deck_commands(channel, split_message, self.incantation_deck)
 
     async def object_of_power_commands(self, channel, split_message):
-        # get named
-        # get random
-        # get random for level
-        # get random in level range
-        await channel.send('TODO implement object of power commands')
+        print('OBJECTS OF POWER COMMANDS')
+        await self.basic_deck_commands(channel, split_message, self.objects_of_power_deck)
+
+    async def kindled_items_commands(self, channel, split_message):
+        print('KINDLED ITEMS COMMANDS')
+        await self.basic_deck_commands(channel, split_message, self.kindled_items_deck)
 
     async def basic_deck_commands(self, channel, split_message, deck):
         if split_message == []:
@@ -174,6 +185,7 @@ class CustomClient(discord.Client):
             search_term = split_message[0]
             for term in split_message[1:]:
                 search_term = search_term + ' ' + term
+            print('-SEARCH {search_term}'.format(search_term=search_term))
             card_file = deck.get_card_by_name(search_term)
             if card_file:
                 await self.display_card_by_path(channel, card_file)

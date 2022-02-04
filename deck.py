@@ -17,7 +17,6 @@ class Deck:
     def get_card_by_name(self, card_name):
         search_term = card_name.upper()
         search_term = search_term.replace(' ', '_')
-        print (search_term)
         for card in self.cards:
             if (card.name.startswith(search_term)):
                 print('--' + card.name)
