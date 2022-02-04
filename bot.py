@@ -1,6 +1,7 @@
 import os
 import deck
 import discord
+import argparse
 
 from dotenv import load_dotenv
 from ephemera_deck import EphemeraDeck
@@ -18,25 +19,45 @@ INCANTATION_CARD_PATH = os.getenv('INCANTATION_CARD_PATH')
 EPHEMERA_CARD_PATH = os.getenv('EPHEMERA_CARD_PATH')
 OBJECTS_OF_POWER_CARD_PATH = os.getenv('OBJECTS_OF_POWER_CARD_PATH')
 
-VALID_COMMANDS = (
-    '/sooth',
-    '/spell',
-    '/vance',
-    '/weaver',
-    '/ephemera',
-    '/eph',
-    '/incantation',
-    '/inc',
-    '/objectofpower',
-    '/obj',
-    '/oop',
-    '/kindleditems',
-    '/kin'
-)
+BOT_COMMANDS = ['is']
+SOOTH_COMMANDS = ['sooth', 'so']
+VANCE_COMMANDS = ['vance', 'v']
+WEAVER_COMMANDS = ['weaver', 'w']
+SPELL_COMMANDS = ['spell', 'sp']
+EPHEMERA_COMMANDS = ['ephemera', 'eph', 'e']
+INCANTATION_COMMANDS = ['incantation', 'inc', 'i']
+OBJECT_OF_POWER_COMMANDS = ['objectofpower', 'obj', 'oop', 'o']
+KINDLED_ITEM_COMMANDS = ['kindleditems', 'kin', 'k']
 
+
+VALID_COMMANDS = tuple(
+    BOT_COMMANDS +
+    SOOTH_COMMANDS +
+    VANCE_COMMANDS +
+    WEAVER_COMMANDS +
+    SPELL_COMMANDS +
+    EPHEMERA_COMMANDS +
+    INCANTATION_COMMANDS +
+    OBJECT_OF_POWER_COMMANDS +
+    KINDLED_ITEM_COMMANDS
+    )
+
+print(VALID_COMMANDS)
 
 class CustomClient(discord.Client):
     def setup(self):
+        self.command_parser = argparse.ArgumentParser(description='Invisible Sun Discord Bot')
+        self.command_parser.add_argument('/sooth')
+
+        self.card_search_parser = argparse.ArgumentParser(description='Argument parser for basic card search', conflict_handler="resolve")
+        self.card_search_parser.add_argument('-h', '--help', action='store_true', help='Show this message' )
+        self.card_search_parser.add_argument('-r', '--random', action='store_true', help='Get a random card')
+        self.card_search_parser.add_argument('-l', '--level', type=int, help='A level for card searching')
+        self.card_search_parser.add_argument('-lb', '--lower-bound', type=int, default=1, help='A lower level bound for card searching')
+        self.card_search_parser.add_argument('-ub', '--upper-bound', type=int, default=10, help='An upper level bound for card searching')
+        self.card_search_parser.add_argument('-c', '--colour', type=str, help='A colour to search')
+        self.card_search_parser.add_argument('-s', '--search', metavar='SEARCH_TERM', type=str, nargs='+', default=None, help='A lower level bound for card searching' )
+
         self.sooth_deck = SoothDeck(INVISIBLE_SUN_SOOTH_CARD_LINK, INVISIBLE_SUN_SOOTH_CARD_IMAGE_LINK)
         self.incantation_deck = IncantationDeck(INCANTATION_CARD_PATH)
         self.ephemera_deck = EphemeraDeck(EPHEMERA_CARD_PATH)
@@ -50,31 +71,50 @@ class CustomClient(discord.Client):
             f'{guild.name}(id: {guild.id})'
         )
 
-    # TODO IS Help
     async def on_message(self, message):
         if message.author == client.user:
             return
-        if message.content.startswith(VALID_COMMANDS):
-            split_message = message.content.split(' ')[:]
+        if not (message.content.startswith('/') or message.content.startswith('!')):
+            print('NOT VALID COMMAND')
+            return
+        stripped_message = message.content[1:]
+        if stripped_message.startswith(VALID_COMMANDS):
+            print('VALID COMMAND')
+            split_message = stripped_message.split(' ')[:]
             command = split_message[0].lower()
-            if command == '/sooth':
+            print(command)
+            if command in BOT_COMMANDS:
+                e = discord.Embed()
+                e.set_footer(text='Valid Commands: {command}'.format(command=VALID_COMMANDS))
+                await message.channel.send(embed=e)
+                return
+            # Complex deck commands
+            if command in SOOTH_COMMANDS:
                 await self.sooth_commands(message.channel, split_message[1:])
-            elif command == '/spell':
-                await self.spell_commands(message.channel, split_message[1:])
-            elif command == '/vance':
+                return
+            elif command in VANCE_COMMANDS:
                 await self.vance_commands(message.channel, split_message[1:])
-            elif command == '/weaver':
-                await self.incantation_commands(message.channel, split_message[1:])
-            elif command in ['/ephemera', '/eph']:
-                await self.ephemera_commands(message.channel, split_message[1:])
-            elif command in ['/incantation', '/inc']:
-                await self.incantation_commands(message.channel, split_message[1:])
-            elif command in ['/objectofpower', '/obj', '/oop']:
-                await self.object_of_power_commands(message.channel, split_message[1:])
-            elif command in ['/kindleditems', '/kin']:
-                await self.kindled_items_commands(message.channel, split_message[1:])
-            else:
+                return
+            elif command in WEAVER_COMMANDS:
+                await self.weaver_commands(message.channel, split_message[1:])
+                return
+            # Standard deck commands
+            try:
+                should_display_help = len(split_message[1:]) != 0
+                parsed_args = vars(self.card_search_parser.parse_args(split_message[1:]))
+            except:
                 await message.channel.send('unrecognised command')
+                return
+            if command in SPELL_COMMANDS:
+                await self.spell_commands(message.channel, parsed_args, should_display_help)
+            elif command in EPHEMERA_COMMANDS:
+                await self.ephemera_commands(message.channel, parsed_args, should_display_help)
+            elif command in INCANTATION_COMMANDS:
+                await self.incantation_commands(message.channel, parsed_args, should_display_help)
+            elif command in OBJECT_OF_POWER_COMMANDS:
+                await self.object_of_power_commands(message.channel, parsed_args, should_display_help)
+            elif command in KINDLED_ITEM_COMMANDS:
+                await self.kindled_items_commands(message.channel, parsed_args, should_display_help)
 
     async def sooth_commands(self, channel, split_message):
         print('SOOTH COMMANDS')
@@ -114,7 +154,9 @@ class CustomClient(discord.Client):
             if image_link and card_link:
                 await self.display_card_by_link(channel, card_link, image_link)
             else:
-                await channel.send('Sooth card not found')
+                e = discord.Embed()
+                e.set_footer(text='Sooth card not found')
+                await channel.send(embed=e)
 
     async def spell_commands(self, channel, split_message):
         # get named
@@ -134,63 +176,52 @@ class CustomClient(discord.Client):
         # get named
         await channel.send('TODO implement weaver commands')
 
-    async def ephemera_commands(self, channel, split_message):
+    async def ephemera_commands(self, channel, parsed_args, should_display_help):
         print('EPHEMERA COMMANDS')
-        await self.basic_deck_commands(channel, split_message, self.ephemera_deck)
+        await self.basic_deck_commands(channel, parsed_args, should_display_help, self.ephemera_deck)
 
-    async def incantation_commands(self, channel, split_message):
+    async def incantation_commands(self, channel, parsed_args, should_display_help):
         print('INCANTATION COMMANDS')
-        await self.basic_deck_commands(channel, split_message, self.incantation_deck)
+        await self.basic_deck_commands(channel, parsed_args, should_display_help, self.incantation_deck)
 
-    async def object_of_power_commands(self, channel, split_message):
+    async def object_of_power_commands(self, channel, parsed_args, should_display_help):
         print('OBJECTS OF POWER COMMANDS')
-        await self.basic_deck_commands(channel, split_message, self.objects_of_power_deck)
+        await self.basic_deck_commands(channel, parsed_args, should_display_help, self.objects_of_power_deck)
 
-    async def kindled_items_commands(self, channel, split_message):
+    async def kindled_items_commands(self, channel, parsed_args, should_display_help):
         print('KINDLED ITEMS COMMANDS')
-        await self.basic_deck_commands(channel, split_message, self.kindled_items_deck)
+        await self.basic_deck_commands(channel, parsed_args, should_display_help, self.kindled_items_deck)
 
-    async def basic_deck_commands(self, channel, split_message, deck):
-        if split_message == []:
-            print('-RANDOM_BELOW_10')
-            card_file = deck.get_random_card_with_level_below(10)
-            await self.display_card_by_path(channel, card_file)
-            return
-        incantation_command = split_message[0].lower()
-        if incantation_command in ['l', 'level'] or incantation_command.isdigit():
-            level = 1
-            try:
-                level = int(split_message[1])
-            except:
-                level = int(incantation_command)
-            print('-LEVEL {level}'.format(level=level))
-            card_file = deck.get_random_card_with_level(level)
-            await self.display_card_by_path(channel, card_file)
-        elif incantation_command in ['lb', 'below', 'levelbelow']:
-            level = int(split_message[1])
-            print('-LEVEL_BELOW {level}'.format(level=level))
-            card_file = deck.get_random_card_with_level_below(level)
-            await self.display_card_by_path(channel, card_file)
-        elif incantation_command in ['ll', 'between', 'levelbetween']:
-            lower_level = int(split_message[1])
-            upper_level = int(split_message[2])
-            print('-LEVEL_RANGE {lower_level} to {upper_level}'.format(lower_level=lower_level, upper_level=upper_level))
-            card_file = deck.get_random_card_in_level_range(lower_level, upper_level)
-            await self.display_card_by_path(channel, card_file)
-        elif incantation_command == 'all_levels':
-            print('-ALL_LEVELS')
-            card_file = deck.get_random_card()
-            await self.display_card_by_path(channel, card_file)
-        else:
-            search_term = split_message[0]
-            for term in split_message[1:]:
-                search_term = search_term + ' ' + term
-            print('-SEARCH {search_term}'.format(search_term=search_term))
-            card_file = deck.get_card_by_name(search_term)
+    async def basic_deck_commands(self, channel, parsed_args, should_display_help, deck):
+        if 'help' in parsed_args and should_display_help:
+            print('-HELP')
+            e = discord.Embed()
+            e.set_footer(text=self.card_search_parser.format_help())
+            await channel.send(embed=e)
+        elif 'search_term' in parsed_args:
+            complete_search_term = ' '.join(parsed_args.search_term)
+            print('-SEARCH {complete_search_term}'.format(search_term=complete_search_term))
+            card_file = deck.get_card_by_name(complete_search_term)
             if card_file:
                 await self.display_card_by_path(channel, card_file)
             else:
-                await channel.send('Card not found')
+                e = discord.Embed()
+                e.set_footer(text='Card not found')
+                await channel.send(embed=e)
+        elif parsed_args['level'] != None:
+            print('-LEVEL {level}'.format(level=parsed_args['level']))
+            card_file = deck.get_random_card_with_level(parsed_args['level'])
+            await self.display_card_by_path(channel, card_file)
+        else:
+            print('-LEVEL_RANGE {lower_level} to {upper_level}'.format(lower_level=parsed_args['lower_bound'], upper_level=parsed_args['upper_bound']))
+            if parsed_args['colour']: print('-COLOUR {colour}'.format(colour=parsed_args['colour']))
+            card_file = deck.get_card_by_parameters(parsed_args['lower_bound'], parsed_args['upper_bound'], parsed_args['colour'])
+            if card_file:
+                await self.display_card_by_path(channel, card_file)
+            else:
+                e = discord.Embed()
+                e.set_footer(text='No card matching those parameters found')
+                await channel.send(embed=e)
 
     async def display_image_with_link(self, channel, link, image_link):
         e = discord.Embed()
