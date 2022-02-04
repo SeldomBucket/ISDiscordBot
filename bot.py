@@ -3,6 +3,7 @@ import deck
 import discord
 
 from dotenv import load_dotenv
+from ephemera_deck import EphemeraDeck
 from incantation_deck import IncantationDeck
 from sooth import SoothDeck
 
@@ -12,6 +13,8 @@ GUILD = os.getenv('DISCORD_GUILD')
 INVISIBLE_SUN_SOOTH_CARD_LINK = os.getenv('INVISIBLE_SUN_SOOTH_CARD_LINK')
 INVISIBLE_SUN_SOOTH_CARD_IMAGE_LINK = os.getenv('INVISIBLE_SUN_SOOTH_CARD_IMAGE_LINK')
 INCANTATION_CARD_PATH = os.getenv('INCANTATION_CARD_PATH')
+EPHEMERA_CARD_PATH = os.getenv('EPHEMERA_CARD_PATH')
+
 VALID_COMMANDS = (
     '/sooth',
     '/spell',
@@ -30,6 +33,7 @@ class CustomClient(discord.Client):
     def setup(self):
         self.sooth_deck = SoothDeck(INVISIBLE_SUN_SOOTH_CARD_LINK, INVISIBLE_SUN_SOOTH_CARD_IMAGE_LINK)
         self.incantation_deck = IncantationDeck(INCANTATION_CARD_PATH)
+        self.ephemera_deck = EphemeraDeck(EPHEMERA_CARD_PATH)
 
     async def on_ready(self):
         guild = discord.utils.get(client.guilds, name=GUILD)
@@ -121,17 +125,17 @@ class CustomClient(discord.Client):
         await channel.send('TODO implement weaver commands')
 
     async def ephemera_commands(self, channel, split_message):
-        # get named
-        # get random
-        # get random for level
-        # get random in level range
-        await channel.send('TODO implement ephemera commands')
+        print('EPHEMERA COMMANDS')
+        await self.basic_deck_commands(channel, split_message, self.ephemera_deck)
 
     async def incantation_commands(self, channel, split_message):
         print('INCANTATION COMMANDS')
+        await self.basic_deck_commands(channel, split_message, self.incantation_deck)
+
+    async def basic_deck_commands(self, channel, split_message, deck):
         if split_message == []:
             print('-RANDOM_BELOW_10')
-            card_file = self.incantation_deck.get_random_card_with_level_below(10)
+            card_file = deck.get_random_card_with_level_below(10)
             await self.display_card_by_path(channel, card_file)
             return
         incantation_command = split_message[0].lower()
@@ -142,32 +146,32 @@ class CustomClient(discord.Client):
             except:
                 level = int(incantation_command)
             print('-LEVEL {level}'.format(level=level))
-            card_file = self.incantation_deck.get_random_card_with_level(level)
+            card_file = deck.get_random_card_with_level(level)
             await self.display_card_by_path(channel, card_file)
         elif incantation_command in ['lb', 'below', 'levelbelow']:
             level = int(split_message[1])
             print('-LEVEL_BELOW {level}'.format(level=level))
-            card_file = self.incantation_deck.get_random_card_with_level_below(level)
+            card_file = deck.get_random_card_with_level_below(level)
             await self.display_card_by_path(channel, card_file)
         elif incantation_command in ['ll', 'between', 'levelbetween']:
             lower_level = int(split_message[1])
             upper_level = int(split_message[2])
             print('-LEVEL_RANGE {lower_level} to {upper_level}'.format(lower_level=lower_level, upper_level=upper_level))
-            card_file = self.incantation_deck.get_random_card_in_level_range(lower_level, upper_level)
+            card_file = deck.get_random_card_in_level_range(lower_level, upper_level)
             await self.display_card_by_path(channel, card_file)
         elif incantation_command == 'all_levels':
             print('-ALL_LEVELS')
-            card_file = self.incantation_deck.get_random_card()
+            card_file = deck.get_random_card()
             await self.display_card_by_path(channel, card_file)
         else:
             search_term = split_message[0]
             for term in split_message[1:]:
                 search_term = search_term + ' ' + term
-            card_file = self.incantation_deck.get_card_by_name(search_term)
+            card_file = deck.get_card_by_name(search_term)
             if card_file:
                 await self.display_card_by_path(channel, card_file)
             else:
-                await channel.send('Incantation not found')
+                await channel.send('Card not found')
 
     async def object_of_power_commands(self, channel, split_message):
         # get named
