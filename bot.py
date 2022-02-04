@@ -117,7 +117,7 @@ class CustomClient(discord.Client):
     async def vance_commands(self, channel, split_message):
         # get named
         # get random
-        # get random for type
+        # get random for size
         await channel.send('TODO implement vance commands')
 
     async def weaver_commands(self, channel, split_message):
@@ -131,6 +131,13 @@ class CustomClient(discord.Client):
     async def incantation_commands(self, channel, split_message):
         print('INCANTATION COMMANDS')
         await self.basic_deck_commands(channel, split_message, self.incantation_deck)
+
+    async def object_of_power_commands(self, channel, split_message):
+        # get named
+        # get random
+        # get random for level
+        # get random in level range
+        await channel.send('TODO implement object of power commands')
 
     async def basic_deck_commands(self, channel, split_message, deck):
         if split_message == []:
@@ -172,13 +179,6 @@ class CustomClient(discord.Client):
                 await self.display_card_by_path(channel, card_file)
             else:
                 await channel.send('Card not found')
-
-    async def object_of_power_commands(self, channel, split_message):
-        # get named
-        # get random
-        # get random for level
-        # get random in level range
-        await channel.send('TODO implement object of power commands')
 
     async def display_image_with_link(self, channel, link, image_link):
         e = discord.Embed()
