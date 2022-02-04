@@ -29,7 +29,6 @@ INCANTATION_COMMANDS = ['incantation', 'inc', 'i']
 OBJECT_OF_POWER_COMMANDS = ['objectofpower', 'obj', 'oop', 'o']
 KINDLED_ITEM_COMMANDS = ['kindleditems', 'kin', 'k']
 
-
 VALID_COMMANDS = tuple(
     BOT_COMMANDS +
     SOOTH_COMMANDS +
@@ -42,16 +41,10 @@ VALID_COMMANDS = tuple(
     KINDLED_ITEM_COMMANDS
     )
 
-print(VALID_COMMANDS)
-
 class CustomClient(discord.Client):
     def setup(self):
-        self.command_parser = argparse.ArgumentParser(description='Invisible Sun Discord Bot')
-        self.command_parser.add_argument('/sooth')
-
         self.card_search_parser = argparse.ArgumentParser(description='Argument parser for basic card search', conflict_handler="resolve")
         self.card_search_parser.add_argument('-h', '--help', action='store_true', help='Show this message' )
-        self.card_search_parser.add_argument('-r', '--random', action='store_true', help='Get a random card')
         self.card_search_parser.add_argument('-l', '--level', type=int, help='A level for card searching')
         self.card_search_parser.add_argument('-lb', '--lower-bound', type=int, default=1, help='A lower level bound for card searching')
         self.card_search_parser.add_argument('-ub', '--upper-bound', type=int, default=10, help='An upper level bound for card searching')
@@ -75,17 +68,23 @@ class CustomClient(discord.Client):
         if message.author == client.user:
             return
         if not (message.content.startswith('/') or message.content.startswith('!')):
-            print('NOT VALID COMMAND')
             return
         stripped_message = message.content[1:]
         if stripped_message.startswith(VALID_COMMANDS):
-            print('VALID COMMAND')
             split_message = stripped_message.split(' ')[:]
             command = split_message[0].lower()
-            print(command)
             if command in BOT_COMMANDS:
+                help_string =  'Sooth Deck Commands:\t\t\t\t\t' + ', '.join(SOOTH_COMMANDS) + '\n'
+                help_string += 'Vance Spell Deck Commands:\t\t\t' + ', '.join(VANCE_COMMANDS) + '\n'
+                help_string += 'Weaver Aggregate Commands:\t\t\t' + ', '.join(WEAVER_COMMANDS) + '\n'
+                help_string += 'General Spell Deck Commands:\t\t\t' + ', '.join(SPELL_COMMANDS) + '\n'
+                help_string += 'Ephemera Deck Commands:\t\t\t\t' + ', '.join(EPHEMERA_COMMANDS) + '\n'
+                help_string += 'Incantation Deck Commands:\t\t\t' + ', '.join(INCANTATION_COMMANDS) + '\n'
+                help_string += 'Object of Power Deck Commands:\t\t' + ', '.join(OBJECT_OF_POWER_COMMANDS) + '\n'
+                help_string += 'Kindled Item Deck Commands:\t\t\t' + ', '.join(KINDLED_ITEM_COMMANDS) + '\n'
                 e = discord.Embed()
-                e.set_footer(text='Valid Commands: {command}'.format(command=VALID_COMMANDS))
+                e.title = 'Valid Commands (prefix with / or !, use -h afterwards for help)'
+                e.set_footer(text=help_string)
                 await message.channel.send(embed=e)
                 return
             # Complex deck commands
@@ -124,7 +123,11 @@ class CustomClient(discord.Client):
             await self.display_card_by_link(channel, image_link, link=card_link)
             return
         sooth_command = split_message[0].lower()
-        if sooth_command == 'draw':
+        if sooth_command == '-h':
+            e = discord.Embed()
+            e.set_footer(text='Help message not properly implemented just yet, but \'draw\', \'path\', \'active\' commands work, as does text search for a specific card')
+            await channel.send(embed=e)
+        elif sooth_command == 'draw':
             print('-DRAW')
             (image_link, card_link) = self.sooth_deck.draw_random_sooth_card()
             await self.display_card_by_link(channel, image_link, link=card_link)
@@ -158,14 +161,6 @@ class CustomClient(discord.Client):
                 e.set_footer(text='Sooth card not found')
                 await channel.send(embed=e)
 
-    async def spell_commands(self, channel, split_message):
-        # get named
-        # get random
-        # get random for level
-        # get random in level range
-        # get random for sun type
-        await channel.send('TODO implement spell commands')
-
     async def vance_commands(self, channel, split_message):
         # get named
         # get random
@@ -175,6 +170,14 @@ class CustomClient(discord.Client):
     async def weaver_commands(self, channel, split_message):
         # get named
         await channel.send('TODO implement weaver commands')
+
+    async def spell_commands(self, channel, split_message):
+        # get named
+        # get random
+        # get random for level
+        # get random in level range
+        # get random for sun type
+        await channel.send('TODO implement general spell commands')
 
     async def ephemera_commands(self, channel, parsed_args, should_display_help):
         print('EPHEMERA COMMANDS')
