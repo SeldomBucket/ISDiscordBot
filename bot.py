@@ -197,14 +197,15 @@ class CustomClient(discord.Client):
         await self.basic_deck_commands(channel, parsed_args, should_display_help, self.kindled_items_deck)
 
     async def basic_deck_commands(self, channel, parsed_args, should_display_help, deck):
-        if 'help' in parsed_args and should_display_help:
+        print(parsed_args)
+        if parsed_args['help']:
             print('-HELP')
             e = discord.Embed()
             e.set_footer(text=self.card_search_parser.format_help())
             await channel.send(embed=e)
-        elif 'search_term' in parsed_args:
-            complete_search_term = ' '.join(parsed_args.search_term)
-            print('-SEARCH {complete_search_term}'.format(search_term=complete_search_term))
+        elif parsed_args['search'] != None:
+            complete_search_term = ' '.join(parsed_args['search'])
+            print('-SEARCH {complete_search_term}'.format(complete_search_term=complete_search_term))
             card_file = deck.get_card_by_name(complete_search_term)
             if card_file:
                 await self.display_card_by_path(channel, card_file)

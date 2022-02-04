@@ -29,18 +29,7 @@ class Deck:
         return self.card_base_path + card.name
 
     def get_random_card_with_level(self, level):
-        return self.get_random_card_in_level_range(level, level)
-
-    def get_random_card_with_level_below(self, upper_level):
-        return self.get_random_card_in_level_range(1, upper_level)
-
-    def get_random_card_in_level_range(self, lower_level, upper_level):
-        cards_to_choose_from = []
-        for i in range(lower_level - 1, upper_level):
-            cards_to_choose_from = cards_to_choose_from + self.cards_by_level[i]
-        card = random.choice(cards_to_choose_from)
-        print('--' + card.name)
-        return self.card_base_path + card.name
+        return self.get_card_by_parameters(level, level, None)
 
     def get_card_by_parameters(self, lower_level, upper_level, colour):
         cards_to_choose_from = []
