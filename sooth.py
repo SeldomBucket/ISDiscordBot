@@ -111,7 +111,8 @@ class SoothDeck:
             if key.lower().startswith(sooth_name_prefix.lower()):
                 sooth_card_number = SOOTH_DECK[key]
                 return (self.get_sooth_image_link(sooth_card_number), self.get_sooth_link(sooth_card_number))
-        return '--sooth card not recognised'
+        print('--sooth card not recognised')
+        return (None, None)
 
     def get_random_sooth_card_name(self, deck=SOOTH_DECK):
         card_name = random.choice(list(deck.items()))[0]
