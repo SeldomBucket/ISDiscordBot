@@ -93,7 +93,10 @@ class CustomClient(discord.Client):
             if (invisible_sun_card != None):
                 await self.display_sun_with_sooth_card(channel, invisible_sun_card)
         else:
-            (image_link, card_link) = self.sooth_deck.get_sooth_card(split_message[0])
+            search_term = split_message[0]
+            for term in split_message[1:]:
+                search_term = search_term + ' ' + term
+            (image_link, card_link) = self.sooth_deck.get_sooth_card(search_term)
             if image_link and card_link:
                 await self.display_card_by_link(channel, card_link, image_link)
             else:
@@ -132,7 +135,7 @@ class CustomClient(discord.Client):
             await self.display_card_by_path(channel, card_file)
             return
         incantation_command = split_message[0].lower()
-        if incantation_command == 'l' or incantation_command == 'level' or incantation_command.isdigit():
+        if incantation_command in ['l', 'level'] or incantation_command.isdigit():
             level = 1
             try:
                 level = int(split_message[1])
@@ -141,12 +144,12 @@ class CustomClient(discord.Client):
             print('-LEVEL {level}'.format(level=level))
             card_file = self.incantation_deck.get_random_card_with_level(level)
             await self.display_card_by_path(channel, card_file)
-        elif incantation_command == 'lb' or incantation_command == 'below' or incantation_command == 'levelbelow':
+        elif incantation_command in ['lb', 'below', 'levelbelow']:
             level = int(split_message[1])
             print('-LEVEL_BELOW {level}'.format(level=level))
             card_file = self.incantation_deck.get_random_card_with_level_below(level)
             await self.display_card_by_path(channel, card_file)
-        elif incantation_command == 'll':
+        elif incantation_command in ['ll', 'between', 'levelbetween']:
             lower_level = int(split_message[1])
             upper_level = int(split_message[2])
             print('-LEVEL_RANGE {lower_level} to {upper_level}'.format(lower_level=lower_level, upper_level=upper_level))
