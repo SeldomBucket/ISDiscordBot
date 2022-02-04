@@ -13,8 +13,8 @@ from sooth import SoothDeck
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
-INVISIBLE_SUN_SOOTH_CARD_LINK = os.getenv('INVISIBLE_SUN_SOOTH_CARD_LINK')
-INVISIBLE_SUN_SOOTH_CARD_IMAGE_LINK = os.getenv('INVISIBLE_SUN_SOOTH_CARD_IMAGE_LINK')
+SOOTH_CARD_LINK = os.getenv('SOOTH_CARD_LINK')
+SOOTH_CARD_IMAGE_LINK = os.getenv('SOOTH_CARD_IMAGE_LINK')
 INCANTATION_CARD_PATH = os.getenv('INCANTATION_CARD_PATH')
 EPHEMERA_CARD_PATH = os.getenv('EPHEMERA_CARD_PATH')
 OBJECTS_OF_POWER_CARD_PATH = os.getenv('OBJECTS_OF_POWER_CARD_PATH')
@@ -51,7 +51,7 @@ class CustomClient(discord.Client):
         self.card_search_parser.add_argument('-c', '--colour', type=str, help='A colour to search')
         self.card_search_parser.add_argument('-s', '--search', metavar='SEARCH_TERM', type=str, nargs='+', default=None, help='A lower level bound for card searching' )
 
-        self.sooth_deck = SoothDeck(INVISIBLE_SUN_SOOTH_CARD_LINK, INVISIBLE_SUN_SOOTH_CARD_IMAGE_LINK)
+        self.sooth_deck = SoothDeck(SOOTH_CARD_LINK, SOOTH_CARD_IMAGE_LINK)
         self.incantation_deck = IncantationDeck(INCANTATION_CARD_PATH)
         self.ephemera_deck = EphemeraDeck(EPHEMERA_CARD_PATH)
         self.objects_of_power_deck = ObjectsOfPowerDeck(OBJECTS_OF_POWER_CARD_PATH)
@@ -141,14 +141,14 @@ class CustomClient(discord.Client):
             await self.display_sun_with_sooth_card(channel, sun_with_card)
         elif sooth_command == 'active':
             print('-ACTIVE')
-            (sun_with_card, invisible_sun_card) = self.sooth_deck.get_active_sooth_cards()
-            if (sun_with_card == None and invisible_sun_card == None):
+            (sun_with_card, card) = self.sooth_deck.get_active_sooth_cards()
+            if (sun_with_card == None and card == None):
                 await channel.send('NO ACTIVE SOOTH CARDS')
             if (sun_with_card != None):
                 await channel.send('ACTIVE SOOTH CARDS')
                 await self.display_sun_with_sooth_card(channel, sun_with_card)
-            if (invisible_sun_card != None):
-                await self.display_sun_with_sooth_card(channel, invisible_sun_card)
+            if (card != None):
+                await self.display_sun_with_sooth_card(channel, card)
         else:
             search_term = split_message[0]
             for term in split_message[1:]:
