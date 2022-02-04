@@ -123,7 +123,7 @@ class CustomClient(discord.Client):
             await self.display_card_by_link(channel, image_link, link=card_link)
             return
         sooth_command = split_message[0].lower()
-        if sooth_command == '-h':
+        if sooth_command == '-h' or sooth_command == '--help':
             e = discord.Embed()
             e.set_footer(text='Help message not properly implemented just yet, but \'draw\', \'path\', \'active\' commands work, as does text search for a specific card')
             await channel.send(embed=e)
@@ -159,6 +159,7 @@ class CustomClient(discord.Client):
             else:
                 e = discord.Embed()
                 e.set_footer(text='Sooth card not found')
+                e.colour = discord.Colour.red()
                 await channel.send(embed=e)
 
     async def vance_commands(self, channel, split_message):
@@ -224,6 +225,7 @@ class CustomClient(discord.Client):
             else:
                 e = discord.Embed()
                 e.set_footer(text='No card matching those parameters found')
+                e.colour = discord.Colour.red()
                 await channel.send(embed=e)
 
     async def display_image_with_link(self, channel, link, image_link):
