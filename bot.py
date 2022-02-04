@@ -23,11 +23,11 @@ BOT_COMMANDS = ['is']
 SOOTH_COMMANDS = ['sooth', 'so']
 VANCE_COMMANDS = ['vance', 'v']
 WEAVER_COMMANDS = ['weaver', 'w']
-SPELL_COMMANDS = ['spell', 'sp']
+SPELL_COMMANDS = ['spell', 'spe']
 EPHEMERA_COMMANDS = ['ephemera', 'eph', 'e']
 INCANTATION_COMMANDS = ['incantation', 'inc', 'i']
 OBJECT_OF_POWER_COMMANDS = ['objectofpower', 'obj', 'oop', 'o']
-KINDLED_ITEM_COMMANDS = ['kindleditems', 'kin', 'k']
+KINDLED_ITEM_COMMANDS = ['kindleditems', 'kin']
 
 VALID_COMMANDS = tuple(
     BOT_COMMANDS +
