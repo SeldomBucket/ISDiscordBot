@@ -25,9 +25,6 @@ class Deck:
         print(card)
         return self.card_base_path + card.name
 
-    def get_random_card_with_level(self, level):
-        return self.get_card_by_parameters(level, level, None)
-
     def get_card_by_parameters(self, lower_level, upper_level, colour):
         cards_to_choose_from = []
         for i in range(lower_level - 1, upper_level):

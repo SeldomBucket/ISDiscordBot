@@ -212,14 +212,19 @@ class CustomClient(discord.Client):
                 e = discord.Embed()
                 e.set_footer(text='Card not found')
                 await channel.send(embed=e)
-        elif parsed_args['level'] != None:
-            print('-LEVEL {level}'.format(level=parsed_args['level']))
-            card_file = deck.get_random_card_with_level(parsed_args['level'])
-            await self.display_card_by_path(channel, card_file)
         else:
-            print('-LEVEL_RANGE {lower_level} to {upper_level}'.format(lower_level=parsed_args['lower_bound'], upper_level=parsed_args['upper_bound']))
-            if parsed_args['colour']: print('-COLOUR {colour}'.format(colour=parsed_args['colour']))
-            card_file = deck.get_card_by_parameters(parsed_args['lower_bound'], parsed_args['upper_bound'], parsed_args['colour'])
+            if parsed_args['level'] != None:
+                print('-LEVEL {level}'.format(level=parsed_args['level']))
+                lower_bound = parsed_args['level']
+                upper_bound = parsed_args['level']
+            else:
+                lower_bound = parsed_args['lower_bound']
+                upper_bound = parsed_args['upper_bound']
+                print('-LEVEL_RANGE {lower_level} to {upper_level}'.format(lower_level=lower_bound, upper_level=upper_bound))
+            if parsed_args['colour']:
+                colour = parsed_args['colour']
+                print('-COLOUR {colour}'.format(colour=colour))
+            card_file = deck.get_card_by_parameters(lower_bound, upper_bound, colour)
             if card_file:
                 await self.display_card_by_path(channel, card_file)
             else:
