@@ -9,9 +9,6 @@ class Deck:
         self.cards_by_level = []
         for i in range(14):
             level = i+1
-            # for card in self.card_list:
-            #     if card.level == level:
-            #         self.cards_by_level.append(card)
             self.cards_by_level.append([card for card in self.cards if card.level == level])
 
     def get_card_by_name(self, card_name):
@@ -37,9 +34,7 @@ class Deck:
             cards_to_choose_from = cards_to_choose_from + self.cards_by_level[i]
         filtered_cards = cards_to_choose_from.copy()
         if colour:
-            for card in cards_to_choose_from:
-                if card.colour == colour:
-                    filtered_cards.remove(card)
+            filtered_cards = [card for card in cards_to_choose_from if card.colour.lower() == colour.lower()]
         if len(filtered_cards) > 0:
             card = random.choice(filtered_cards)
             print('--' + card.name)

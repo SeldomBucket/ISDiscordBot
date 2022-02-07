@@ -5,6 +5,7 @@ import argparse
 
 from dotenv import load_dotenv
 from ephemera_deck import EphemeraDeck
+from general_spells_deck import GeneralSpellsDeck
 from incantation_deck import IncantationDeck
 from kindled_items_deck import KindledItemsDeck
 from objects_of_power_deck import ObjectsOfPowerDeck
@@ -18,6 +19,7 @@ SOOTH_CARD_IMAGE_LINK = os.getenv('SOOTH_CARD_IMAGE_LINK')
 INCANTATION_CARD_PATH = os.getenv('INCANTATION_CARD_PATH')
 EPHEMERA_CARD_PATH = os.getenv('EPHEMERA_CARD_PATH')
 OBJECTS_OF_POWER_CARD_PATH = os.getenv('OBJECTS_OF_POWER_CARD_PATH')
+GENERAL_SPELLS_CARD_PATH = os.getenv('GENERAL_SPELLS_CARD_PATH')
 
 BOT_COMMANDS = ['is']
 SOOTH_COMMANDS = ['sooth', 'so']
@@ -56,6 +58,7 @@ class CustomClient(discord.Client):
         self.ephemera_deck = EphemeraDeck(EPHEMERA_CARD_PATH)
         self.objects_of_power_deck = ObjectsOfPowerDeck(OBJECTS_OF_POWER_CARD_PATH)
         self.kindled_items_deck = KindledItemsDeck(OBJECTS_OF_POWER_CARD_PATH)
+        self.general_spells_deck = GeneralSpellsDeck(GENERAL_SPELLS_CARD_PATH)
 
     async def on_ready(self):
         guild = discord.utils.get(client.guilds, name=GUILD)
@@ -105,7 +108,7 @@ class CustomClient(discord.Client):
                 await message.channel.send('unrecognised command')
                 return
             if command in SPELL_COMMANDS:
-                await self.spell_commands(message.channel, parsed_args, should_display_help)
+                await self.general_spells_commands(message.channel, parsed_args, should_display_help)
             elif command in EPHEMERA_COMMANDS:
                 await self.ephemera_commands(message.channel, parsed_args, should_display_help)
             elif command in INCANTATION_COMMANDS:
@@ -172,13 +175,9 @@ class CustomClient(discord.Client):
         # get named
         await channel.send('TODO implement weaver commands')
 
-    async def spell_commands(self, channel, split_message):
-        # get named
-        # get random
-        # get random for level
-        # get random in level range
-        # get random for sun type
-        await channel.send('TODO implement general spell commands')
+    async def general_spells_commands(self, channel, parsed_args, should_display_help):
+        print('GENERAL SPELL COMMANDS')
+        await self.basic_deck_commands(channel, parsed_args, should_display_help, self.general_spells_deck)
 
     async def ephemera_commands(self, channel, parsed_args, should_display_help):
         print('EPHEMERA COMMANDS')
