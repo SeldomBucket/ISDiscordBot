@@ -14,10 +14,14 @@ class Deck:
         processed_card_list = []
         for card in loaded_cards["cards"]:
             card_title = card["title"]
+
             card_file = card_title.replace(" ", "_") + ".jpg"
+
             # remove the (+x die/dice) from levels
             card_level = re.sub(r"\s\(\+\d di.+\)", "", card["level"])
+
             card_color = card["colour"]
+
             card_description = card["description"]
 
             try:
@@ -63,7 +67,7 @@ class Deck:
         search_term = search_term.replace(' ', '_')
         for card in self.cards:
             if (card.filename.startswith(search_term)):
-                print('--' + card.name)
+                print('--' + card.title)
                 return self.card_base_path + card.filename
         print('--card not recognised')
 
@@ -81,7 +85,7 @@ class Deck:
             filtered_cards = [card for card in cards_to_choose_from if card.colour.lower() == colour.lower()]
         if len(filtered_cards) > 0:
             card = random.choice(filtered_cards)
-            print('--' + card.filename)
+            print('--' + card.title)
             return self.card_base_path + card.filename
         return None
 
@@ -102,8 +106,12 @@ class Card:
         return """
             Name: {title}\n
             Level: {level}\n
-            Colour: {colour}""".format(title=self.title, level=self.level, colour=self.colour)
-
+            Colour: {colour}
+            Description: {description}"""
+            .format(
+                title=self.title, 
+                level=self.level, 
+                description=self.description)
 
 
 if __name__ == '__main__':
