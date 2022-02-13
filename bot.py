@@ -49,11 +49,11 @@ class CustomClient(discord.Client):
         self.card_search_parser.add_argument('-s', '--search', metavar='SEARCH_TERM', type=str, nargs='+', default=None, help='A lower level bound for card searching' )
 
         self.sooth_deck = SoothDeck(SOOTH_CARD_LINK, SOOTH_CARD_IMAGE_LINK)
-        self.incantation_deck = Deck('incantation.json', INCANTATION_CARD_PATH)
-        self.ephemera_deck = Deck('ephemera.json', EPHEMERA_CARD_PATH)
-        self.objects_of_power_deck = Deck('objects.json', OBJECTS_OF_POWER_CARD_PATH)
-        self.kindled_items_deck = Deck('kindled.json', OBJECTS_OF_POWER_CARD_PATH)
-        self.general_spells_deck = Deck('general-spells.json', GENERAL_SPELLS_CARD_PATH)
+        self.incantation_deck = Deck('decks/incantation.json', INCANTATION_CARD_PATH)
+        self.ephemera_deck = Deck('decks/ephemera.json', EPHEMERA_CARD_PATH)
+        self.objects_of_power_deck = Deck('decks/objects.json', OBJECTS_OF_POWER_CARD_PATH)
+        self.kindled_items_deck = Deck('decks/kindled.json', OBJECTS_OF_POWER_CARD_PATH)
+        self.general_spells_deck = Deck('decks/general-spells.json', GENERAL_SPELLS_CARD_PATH)
 
     async def on_ready(self):
         guild = discord.utils.get(client.guilds, name=GUILD)
