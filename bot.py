@@ -1,15 +1,10 @@
 import os
-import deck
 import discord
 import argparse
 
+from deck_json import Deck
 from dotenv import load_dotenv
-from ephemera_deck import EphemeraDeck
-from general_spells_deck import GeneralSpellsDeck
-from incantation_deck import IncantationDeck
-from kindled_items_deck import KindledItemsDeck
-from objects_of_power_deck import ObjectsOfPowerDeck
-from sooth import SoothDeck
+from sooth_deck import SoothDeck
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -54,11 +49,11 @@ class CustomClient(discord.Client):
         self.card_search_parser.add_argument('-s', '--search', metavar='SEARCH_TERM', type=str, nargs='+', default=None, help='A lower level bound for card searching' )
 
         self.sooth_deck = SoothDeck(SOOTH_CARD_LINK, SOOTH_CARD_IMAGE_LINK)
-        self.incantation_deck = IncantationDeck(INCANTATION_CARD_PATH)
-        self.ephemera_deck = EphemeraDeck(EPHEMERA_CARD_PATH)
-        self.objects_of_power_deck = ObjectsOfPowerDeck(OBJECTS_OF_POWER_CARD_PATH)
-        self.kindled_items_deck = KindledItemsDeck(OBJECTS_OF_POWER_CARD_PATH)
-        self.general_spells_deck = GeneralSpellsDeck(GENERAL_SPELLS_CARD_PATH)
+        self.incantation_deck = Deck('incantation.json', INCANTATION_CARD_PATH)
+        self.ephemera_deck = Deck('ephemera.json', EPHEMERA_CARD_PATH)
+        self.objects_of_power_deck = Deck('objects.json', OBJECTS_OF_POWER_CARD_PATH)
+        self.kindled_items_deck = Deck('kindled.json', OBJECTS_OF_POWER_CARD_PATH)
+        self.general_spells_deck = Deck('general-spells.json', GENERAL_SPELLS_CARD_PATH)
 
     async def on_ready(self):
         guild = discord.utils.get(client.guilds, name=GUILD)
@@ -221,6 +216,7 @@ class CustomClient(discord.Client):
                 lower_bound = parsed_args['lower_bound']
                 upper_bound = parsed_args['upper_bound']
                 print('-LEVEL_RANGE {lower_level} to {upper_level}'.format(lower_level=lower_bound, upper_level=upper_bound))
+            colour = None
             if parsed_args['colour']:
                 colour = parsed_args['colour']
                 print('-COLOUR {colour}'.format(colour=colour))
