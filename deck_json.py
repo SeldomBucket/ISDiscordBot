@@ -44,19 +44,22 @@ class Deck:
             except:
                 card_form = None
 
-            self.cards.append(
-                Card(
-                    card_file,
-                    card_title,
-                    int(card_level),
-                    card_color,
-                    card_description,
-                    card_depletion,
-                    card_effect_depletion,
-                    card_object_depletion,
-                    card_form
+            try:
+                self.cards.append(
+                    Card(
+                        card_file,
+                        card_title,
+                        int(card_level),
+                        card_color,
+                        card_description,
+                        card_depletion,
+                        card_effect_depletion,
+                        card_object_depletion,
+                        card_form
+                        )
                     )
-                )
+            except:
+                print(card_title)
         self.cards_by_level = []
         for i in range(17):
             level = i+1
@@ -107,8 +110,7 @@ class Card:
             Name: {title}\n
             Level: {level}\n
             Colour: {colour}
-            Description: {description}"""
-            .format(
+            Description: {description}""".format(
                 title=self.title, 
                 level=self.level, 
                 description=self.description)
