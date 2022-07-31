@@ -2,7 +2,7 @@
 
 
 ## Card Format
-Cards should be in a json file in a `decks` directory in the same. 
+Cards should be in a json file in a `decks` directory in the same directory as this file. 
 
 ### General Spells
 ```
