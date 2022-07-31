@@ -1,6 +1,8 @@
 import os
 import discord
 import argparse
+import random
+import re
 
 from deck_json import Deck
 from dotenv import load_dotenv
@@ -17,6 +19,7 @@ OBJECTS_OF_POWER_CARD_PATH = os.getenv('OBJECTS_OF_POWER_CARD_PATH')
 GENERAL_SPELLS_CARD_PATH = os.getenv('GENERAL_SPELLS_CARD_PATH')
 
 BOT_COMMANDS = ['is']
+ROLL_COMMANDS = ['roll', 'r']
 SOOTH_COMMANDS = ['sooth', 'so']
 VANCE_COMMANDS = ['vance', 'v']
 WEAVER_COMMANDS = ['weaver', 'w']
@@ -28,6 +31,7 @@ KINDLED_ITEM_COMMANDS = ['kindleditems', 'kin']
 
 VALID_COMMANDS = tuple(
     BOT_COMMANDS +
+    ROLL_COMMANDS +
     SOOTH_COMMANDS +
     VANCE_COMMANDS +
     WEAVER_COMMANDS +
@@ -85,8 +89,12 @@ class CustomClient(discord.Client):
                 e.set_footer(text=help_string)
                 await message.channel.send(embed=e)
                 return
-            # Complex deck commands
-            if command in SOOTH_COMMANDS:
+
+            # Complex commands
+            if command in ROLL_COMMANDS:
+                await self.roll_commands(message.channel, split_message[1:])
+                return
+            elif command in SOOTH_COMMANDS:
                 await self.sooth_commands(message.channel, split_message[1:])
                 return
             elif command in VANCE_COMMANDS:
@@ -112,6 +120,99 @@ class CustomClient(discord.Client):
                 await self.object_of_power_commands(message.channel, parsed_args, should_display_help)
             elif command in KINDLED_ITEM_COMMANDS:
                 await self.kindled_items_commands(message.channel, parsed_args, should_display_help)
+
+
+    async def roll_commands(self, channel, split_message):
+        print('ROLL COMMANDS')
+        if split_message == []:
+            print('-DEFAULT')
+            message = 'Rolling 1d10: ' + str(random.randint(1, 10))
+            await channel.send(message)
+            return
+        if re.search('^\\d+d\\d+', split_message[0]) != None:
+            print('-SINGLE DIE ROLL')
+            print('--' + split_message[0])
+            split_roll = split_message[0].split('d')
+            die_count = split_roll[0]
+            die_type = split_roll[1]
+            message = 'Rolling ' + split_message[0]
+            if (int(die_count) == 1):
+                message = str(random.randint(1, int(die_type)))
+            else:
+                total = 0
+                for i in range(int(die_count)):
+                    rolled_number = random.randint(1, int(die_type))
+                    message += ', '
+                    message += str(rolled_number)
+                    total += rolled_number
+                    print(total)
+                message += ' = ' + str(total)
+            await channel.send(message)
+        elif re.search('^\\d+', split_message[0]) != None and re.search('^\\d+', split_message[1]) != None and re.search('^\\d+', split_message[2]) != None:
+            print('-COMPLEX DIE ROLL')
+            die_count = int(split_message[0])
+            difficulty = int(split_message[1])
+            venture = int(split_message[2])
+            message = '**Rolling ' + str(die_count) + ' dice, Difficulty ' + str(difficulty) + ', Venture ' + str(venture) + ':**\n'
+            print('--DICE       ' + split_message[0])
+            print('--DIFFICULTY ' + split_message[1])
+            print('--VENTURE    ' + split_message[2])
+            maximum_roll = 0
+            if (int(die_count) == 1):
+                maximum_roll = random.randint(0, 9)
+                message += str(maximum_roll)
+            else:
+                zero_count = 0
+                normal_die_roll = random.randint(0, 9)
+                maximum_roll = normal_die_roll
+                message += str(normal_die_roll)
+                for i in range(int(die_count)-1):
+                    magic_die_roll = random.randint(0, 9)
+                    message += ', '
+                    message += '*' + str(magic_die_roll) + '*'
+                    maximum_roll = max(magic_die_roll, maximum_roll)
+                    if (magic_die_roll == 0):
+                        zero_count += 1
+                message += ' = ' + str(maximum_roll)
+                if (zero_count == 1):
+                    message += '\nMinor Flux!'
+                elif (zero_count == 2):
+                    message += '\nMajor Flux!'
+                elif (zero_count == 3):
+                    message += '\nGrand Flux!'
+            if (maximum_roll >= difficulty-venture):
+                message += '\nSuccess :)'
+            else:
+                message += '\nFailure :('
+            await channel.send(message)
+        elif re.search('^\\d+', split_message[0]) != None:
+            print('-STANDARD DIE ROLL')
+            die_count = int(split_message[0])
+            message = '**Rolling ' + str(die_count) + ' dice:**\n'
+            print('--' + split_message[0])
+            if (int(die_count) == 1):
+                message += str(random.randint(0, 9))
+            else:
+                zero_count = 0
+                normal_die_roll = random.randint(0, 9)
+                maximum_roll = normal_die_roll
+                message += str(normal_die_roll)
+                for i in range(int(die_count)-1):
+                    magic_die_roll = random.randint(0, 9)
+                    message += ', '
+                    message += '*' + str(magic_die_roll) + '*'
+                    maximum_roll = max(magic_die_roll, maximum_roll)
+                    if (magic_die_roll == 0):
+                        zero_count += 1
+                message += ' = ' + str(maximum_roll)
+                if (zero_count == 1):
+                    message += '\nMinor Flux!'
+                elif (zero_count == 2):
+                    message += '\nMajor Flux!'
+                elif (zero_count == 3):
+                    message += '\nGrand Flux!'
+            await channel.send(message)
+
 
     async def sooth_commands(self, channel, split_message):
         print('SOOTH COMMANDS')
@@ -160,35 +261,43 @@ class CustomClient(discord.Client):
                 e.colour = discord.Colour.red()
                 await channel.send(embed=e)
 
+
     async def vance_commands(self, channel, split_message):
         # get named
         # get random
         # get random for size
         await channel.send('TODO implement vance commands')
 
+
     async def weaver_commands(self, channel, split_message):
         # get named
         await channel.send('TODO implement weaver commands')
+
 
     async def general_spells_commands(self, channel, parsed_args, should_display_help):
         print('GENERAL SPELL COMMANDS')
         await self.basic_deck_commands(channel, parsed_args, should_display_help, self.general_spells_deck)
 
+
     async def ephemera_commands(self, channel, parsed_args, should_display_help):
         print('EPHEMERA COMMANDS')
         await self.basic_deck_commands(channel, parsed_args, should_display_help, self.ephemera_deck)
+
 
     async def incantation_commands(self, channel, parsed_args, should_display_help):
         print('INCANTATION COMMANDS')
         await self.basic_deck_commands(channel, parsed_args, should_display_help, self.incantation_deck)
 
+
     async def object_of_power_commands(self, channel, parsed_args, should_display_help):
         print('OBJECTS OF POWER COMMANDS')
         await self.basic_deck_commands(channel, parsed_args, should_display_help, self.objects_of_power_deck)
 
+
     async def kindled_items_commands(self, channel, parsed_args, should_display_help):
         print('KINDLED ITEMS COMMANDS')
         await self.basic_deck_commands(channel, parsed_args, should_display_help, self.kindled_items_deck)
+
 
     async def basic_deck_commands(self, channel, parsed_args, should_display_help, deck):
         print(parsed_args)
@@ -229,11 +338,13 @@ class CustomClient(discord.Client):
                 e.colour = discord.Colour.red()
                 await channel.send(embed=e)
 
+
     async def display_image_with_link(self, channel, link, image_link):
         e = discord.Embed()
         e.set_image(url=image_link)
         e.title = link
         await channel.send(embed=e)
+
 
     async def display_sun_with_sooth_card(self, channel, sun_with_card):
         await self.display_card_by_link(
@@ -244,6 +355,7 @@ class CustomClient(discord.Client):
             sun_with_card.sun_name
         )
 
+
     async def display_card_by_link(self, channel, card_image_link, colour = discord.Colour.default(), link = '', footer = ''):
         e = discord.Embed()
         e.set_image(url=card_image_link)
@@ -251,6 +363,7 @@ class CustomClient(discord.Client):
         e.title = link
         e.set_footer(text=footer)
         await channel.send(embed=e)
+
 
     async def display_card_by_path(self, channel, card_image_path):
         await channel.send(file=discord.File(card_image_path))
