@@ -129,7 +129,7 @@ class CustomClient(discord.Client):
             message = 'Rolling 1d10: ' + str(random.randint(1, 10))
             await channel.send(message)
             return
-        if re.search('^\\d+d\\d+', split_message[0]) != None:
+        if re.search('^\\d*d\\d+', split_message[0]) != None:
             print('-SINGLE DIE ROLL')
             print('--' + split_message[0])
             split_roll = split_message[0].split('d')
