@@ -4,6 +4,7 @@ import argparse
 
 from deck_json import Deck
 from dotenv import load_dotenv
+from old_sooth_deck import OldSoothDeck
 from sooth_deck import SoothDeck
 
 load_dotenv()
@@ -48,7 +49,7 @@ class CustomClient(discord.Client):
         self.card_search_parser.add_argument('-c', '--colour', type=str, help='A colour to search')
         self.card_search_parser.add_argument('-s', '--search', metavar='SEARCH_TERM', type=str, nargs='+', default=None, help='A lower level bound for card searching' )
 
-        self.sooth_deck = SoothDeck(SOOTH_CARD_LINK, SOOTH_CARD_IMAGE_LINK)
+        self.sooth_deck = SoothDeck('decks/sooth.json', SOOTH_CARD_LINK, SOOTH_CARD_IMAGE_LINK)
         self.incantation_deck = Deck('decks/incantation.json', INCANTATION_CARD_PATH)
         self.ephemera_deck = Deck('decks/ephemera.json', EPHEMERA_CARD_PATH)
         self.objects_of_power_deck = Deck('decks/objects.json', OBJECTS_OF_POWER_CARD_PATH)
@@ -117,8 +118,8 @@ class CustomClient(discord.Client):
         print('SOOTH COMMANDS')
         if split_message == []:
             print('-RANDOM')
-            (image_link, card_link) = self.sooth_deck.get_random_sooth_card()
-            await self.display_card_by_link(channel, image_link, link=card_link)
+            sooth_card = self.sooth_deck.get_random_sooth_card()
+            await self.display_sooth_card_with_link(channel, sooth_card.image_link, link=sooth_card.link)
             return
         sooth_command = split_message[0].lower()
         if sooth_command == '-h' or sooth_command == '--help':
@@ -127,8 +128,8 @@ class CustomClient(discord.Client):
             await channel.send(embed=e)
         elif sooth_command == 'draw':
             print('-DRAW')
-            (image_link, card_link) = self.sooth_deck.draw_random_sooth_card()
-            await self.display_card_by_link(channel, image_link, link=card_link)
+            card = self.sooth_deck.draw_random_sooth_card()
+            await self.display_sooth_card_with_link(channel, card.image_link, link=card.card_link)
         elif sooth_command == 'path':
             print('-PATH')
             sun_with_card = None
@@ -151,9 +152,9 @@ class CustomClient(discord.Client):
             search_term = split_message[0]
             for term in split_message[1:]:
                 search_term = search_term + ' ' + term
-            (image_link, card_link) = self.sooth_deck.get_sooth_card(search_term)
-            if image_link and card_link:
-                await self.display_card_by_link(channel, card_link, image_link)
+            sooth_card = self.sooth_deck.get_sooth_card(search_term)
+            if sooth_card:
+                await self.display_sooth_card_with_link(channel, sooth_card.image_link, link=sooth_card.link)
             else:
                 e = discord.Embed()
                 e.set_footer(text='Sooth card not found')
@@ -236,15 +237,15 @@ class CustomClient(discord.Client):
         await channel.send(embed=e)
 
     async def display_sun_with_sooth_card(self, channel, sun_with_card):
-        await self.display_card_by_link(
+        await self.display_sooth_card_with_link(
             channel,
-            sun_with_card.sooth_card_image_link,
+            sun_with_card.sooth_card.image_link,
             sun_with_card.sun_colour,
-            sun_with_card.sooth_card_link,
-            sun_with_card.sun_name
+            sun_with_card.sooth_card.link,
+            sun_with_card.sooth_card.get_card_function(sun_with_card.sun_name)
         )
 
-    async def display_card_by_link(self, channel, card_image_link, colour = discord.Colour.default(), link = '', footer = ''):
+    async def display_sooth_card_with_link(self, channel, card_image_link, colour = discord.Colour.default(), link = '', footer = ''):
         e = discord.Embed()
         e.set_image(url=card_image_link)
         e.colour = colour

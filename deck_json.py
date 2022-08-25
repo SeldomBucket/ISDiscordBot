@@ -56,8 +56,8 @@ class Deck:
                         card_effect_depletion,
                         card_object_depletion,
                         card_form
-                        )
                     )
+                )
             except:
                 print(card_title)
         self.cards_by_level = []
