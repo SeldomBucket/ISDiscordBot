@@ -118,26 +118,28 @@ class SoothDeck:
         print(sooth_name_prefix)
         for card in self.cards:
             if card.name.lower().startswith(sooth_name_prefix.lower()):
+                print("--" + card.name)
                 return card
-        print('--sooth card not in remaining deck')
+        print('--could not find sooth card')
         return None
 
     def get_sooth_card_from_deck(self, sooth_name_prefix):
         for card in self.current_sooth_deck:
             if card.name.lower().startswith(sooth_name_prefix.lower()):
+                print("--" + card.name)
+                self.current_sooth_deck.remove(card)
                 return card
-        self.current_sooth_deck.remove(card)
-        print(card.name)
-        return card
+        print('--could not find sooth card in remaining deck')
+        return None
 
     def get_random_sooth_card(self):
         card = random.choice(self.cards)
-        print(card.name)
+        print("--" + card.name)
         return card
 
-    def get_random_sooth_card_and_remove(self):
+    def get_random_sooth_card_from_deck(self):
         card = random.choice(self.current_sooth_deck)
-        print(card.name)
+        print("--" + card.name)
         self.current_sooth_deck.remove(card)
         return card
 
@@ -145,7 +147,7 @@ class SoothDeck:
         if given_card_name != '':
             card = self.get_sooth_card_from_deck(given_card_name)
         else:
-            card = self.get_random_sooth_card_and_remove()
+            card = self.get_random_sooth_card_from_deck()
         self.path_of_suns.next_sun(card)
         return self.path_of_suns.get_current_active_sun()
 
@@ -212,9 +214,10 @@ class SoothCard:
                 return "no effect as no players in the " + self.family.value + " family"
 
         elif (self.type == SoothCardType.NEMESIS):
+            function_description = ""
             if (players_in_family != ""):
                 function_description += "-2 to all actions by " + players_in_family + "\n"
-            function_description = "-1 to all actions by " + players_not_in_family
+            function_description += "-1 to all actions by " + players_not_in_family
             return function_description
 
         elif (self.type == SoothCardType.DEFENDER):
@@ -226,9 +229,10 @@ class SoothCard:
 
         elif (self.type == SoothCardType.SOVEREIGN):
             # Sovereign: +1 to all actions, +2 if heart is linked to family
+            function_description = ""
             if (players_in_family != ""):
                 function_description += "+2 to all actions by " + players_in_family + "\n"
-            function_description = "+1 to all actions by " + players_not_in_family
+            function_description += "+1 to all actions by " + players_not_in_family
             return function_description
 
 

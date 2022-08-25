@@ -128,8 +128,12 @@ class CustomClient(discord.Client):
             await channel.send(embed=e)
         elif sooth_command == 'draw':
             print('-DRAW')
-            card = self.sooth_deck.draw_random_sooth_card()
-            await self.display_sooth_card_with_link(channel, card.image_link, link=card.card_link)
+            card = None
+            if len(split_message) == 1:
+                card = self.sooth_deck.get_random_sooth_card_from_deck()
+            else:
+                card = self.sooth_deck.get_sooth_card_from_deck(split_message[1])
+            await self.display_sooth_card_with_link(channel, card.image_link, link=card.link)
         elif sooth_command == 'path':
             print('-PATH')
             sun_with_card = None
@@ -242,16 +246,17 @@ class CustomClient(discord.Client):
             sun_with_card.sooth_card.image_link,
             sun_with_card.sun_colour,
             sun_with_card.sooth_card.link,
-            sun_with_card.sooth_card.get_card_function(sun_with_card.sun_name)
+            sun_with_card.sooth_card.get_card_function(sun_with_card.sun_name),
+            sun_with_card.sun_name.value + " Sun"
         )
 
-    async def display_sooth_card_with_link(self, channel, card_image_link, colour = discord.Colour.default(), link = '', footer = ''):
+    async def display_sooth_card_with_link(self, channel, card_image_link, colour = discord.Colour.default(), link = '', description = '', footer = ''):
         e = discord.Embed()
         e.set_image(url=card_image_link)
         e.colour = colour
-        e.title = link
+        e.title = description
         e.set_footer(text=footer)
-        await channel.send(embed=e)
+        await channel.send(link, embed=e)
 
     async def display_card_by_path(self, channel, card_image_path):
         await channel.send(file=discord.File(card_image_path))
