@@ -59,7 +59,7 @@ class Deck:
                     )
                 )
             except:
-                print(card_title)
+                print("COULD NOT ADD " + card_title)
         self.cards_by_level = []
         for i in range(17):
             level = i+1
