@@ -49,12 +49,15 @@ class CustomClient(discord.Client):
         self.card_search_parser.add_argument('-c', '--colour', type=str, help='A colour to search')
         self.card_search_parser.add_argument('-s', '--search', metavar='SEARCH_TERM', type=str, nargs='+', default=None, help='A lower level bound for card searching' )
 
-        self.sooth_deck = SoothDeck('decks/sooth.json', SOOTH_CARD_LINK, SOOTH_CARD_IMAGE_LINK)
         self.incantation_deck = Deck('decks/incantation.json', INCANTATION_CARD_PATH)
         self.ephemera_deck = Deck('decks/ephemera.json', EPHEMERA_CARD_PATH)
         self.objects_of_power_deck = Deck('decks/objects.json', OBJECTS_OF_POWER_CARD_PATH)
         self.kindled_items_deck = Deck('decks/kindled.json', OBJECTS_OF_POWER_CARD_PATH)
         self.general_spells_deck = Deck('decks/general-spells.json', GENERAL_SPELLS_CARD_PATH)
+
+        self.sooth_deck = SoothDeck('decks/sooth.json', SOOTH_CARD_LINK, SOOTH_CARD_IMAGE_LINK)
+        print('-SOOTH LOAD')
+        self.sooth_deck.load()
 
     async def on_ready(self):
         guild = discord.utils.get(client.guilds, name=GUILD)
@@ -122,9 +125,15 @@ class CustomClient(discord.Client):
             await self.display_sooth_card_with_link(channel, sooth_card.image_link, link=sooth_card.link)
             return
         sooth_command = split_message[0].lower()
-        if sooth_command == '-h' or sooth_command == '--help':
+        if sooth_command == '-h' or sooth_command == '--help' or sooth_command == 'help':
             e = discord.Embed()
-            e.set_footer(text='Help message not properly implemented just yet, but \'draw\', \'path\', \'active\' commands work, as does text search for a specific card')
+            help_text = 'The path of suns saves and loads automatically, so be careful with these commands!\n'
+            help_text += 'draw:     Draw a card from the sooth deck and saves the path state.\n'
+            help_text += 'path:     Play the next card on the path of suns. Follow with a card name to use that card next.\n'
+            help_text += 'active:   Show the current active sooth cards.\n'
+            help_text += 'clear:    Clears the current path of suns.\n'
+            help_text += 'reset:    Resets the sooth deck.\n'
+            e.set_footer(text=help_text)
             await channel.send(embed=e)
         elif sooth_command == 'draw':
             print('-DRAW')
@@ -152,6 +161,14 @@ class CustomClient(discord.Client):
                 await self.display_sun_with_sooth_card(channel, sun_with_card)
             if (card != None):
                 await self.display_sun_with_sooth_card(channel, card)
+        elif sooth_command == 'clear':
+            print('-CLEAR')
+            self.sooth_deck.path_of_suns.clear_path()
+            await channel.send('CLEARED PATH OF SUNS')
+        elif sooth_command == 'reset':
+            print('-RESET')
+            self.sooth_deck.reset()
+            await channel.send('RESET SOOTH DECK')
         else:
             search_term = split_message[0]
             for term in split_message[1:]:
@@ -246,7 +263,7 @@ class CustomClient(discord.Client):
             sun_with_card.sooth_card.image_link,
             sun_with_card.sun_colour,
             sun_with_card.sooth_card.link,
-            sun_with_card.sooth_card.get_card_function(sun_with_card.sun_name),
+            self.sooth_deck.get_card_function(sun_with_card),
             sun_with_card.sun_name.value + " Sun"
         )
 
