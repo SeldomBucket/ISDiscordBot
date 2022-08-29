@@ -209,7 +209,7 @@ class SoothDeck:
         elif (card.type == SoothCardType.COMPANION):
             previous_card = self.path_of_suns.get_previous_card()
             function_description = self.get_card_function(previous_card)
-            function_description += "\n--Duplicate of " + previous_card.sooth_card.name + " on " + previous_card.sun_name.value + "--"
+            function_description += "\n--Duplicates " + previous_card.sooth_card.name + " on " + previous_card.sun_name.value + "--"
             return function_description
 
         elif (card.type == SoothCardType.ADEPT):
